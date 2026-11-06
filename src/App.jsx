@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import './App.css'
 
 function App() {
+  const isMC = window.location.pathname === '/mc' 
   const [guestName, setGuestName] = useState('')
   const [recipient, setRecipient] = useState('Couple')
   const [message, setMessage] = useState('')
@@ -88,72 +89,124 @@ function showNextWish() {
   return () => clearInterval(timer)
 }, [isPaused, filteredWishes.length])
 
-  return (
-    <div className="app">
-      <header className="navbar">
-        <a href="#home" className="logo">
-          VowMemories<span>.</span>
-        </a>
+  
+return (
+  <div className="app">
+    <header className="navbar">
+      <a href="/" className="logo">
+        VowMemories<span>.</span>
+      </a>
 
+      {!isMC && (
         <nav>
           <a href="#home">Home</a>
           <a href="#how-it-works">How it works</a>
-         <a href="#send-wish">Share a Wish</a>
+          <a href="#send-wish">Share a Wish</a>
         </nav>
-      </header>
+      )}
+    </header>
 
-      <section className="slideshow-section" id="live-display">
-  <p className="eyebrow">THE WEDDING CELEBRATION</p>
-  <h2>Live Wedding Wishes</h2>
-  <p>Beautiful words to treasure forever.</p>
-
-  <div className="slideshow-card">
-    {currentWish ? (
+    {isMC && (
       <>
-        <span className="slideshow-heart"></span>
-        <h3>{currentWish.guestName}</h3>
-        <p className="slideshow-message">
-          "{currentWish.message}"
-        </p>
-        <small>With love, for {currentWish.recipient}</small>
+        <section className="slideshow-section" id="live-display">
+          <p className="eyebrow">THE WEDDING CELEBRATION</p>
+          <h2>Live Wedding Wishes</h2>
+          <p>Beautiful words to treasure forever.</p>
+
+          <div className="slideshow-card">
+            {currentWish ? (
+              <>
+                <span className="slideshow-heart"></span>
+                <h3>{currentWish.guestName}</h3>
+                <p className="slideshow-message">
+                  "{currentWish.message}"
+                </p>
+                <small>With love, for {currentWish.recipient}</small>
+              </>
+            ) : (
+              <p>Wedding wishes will appear here.</p>
+            )}
+          </div>
+
+          <div className="slideshow-controls">
+            <button
+              onClick={showPreviousWish}
+              disabled={filteredWishes.length === 0}
+            >
+              Previous
+            </button>
+
+            <button
+              className="next-button"
+              onClick={showNextWish}
+              disabled={filteredWishes.length === 0}
+            >
+              Next Wish
+            </button>
+
+            <button onClick={() => setIsPaused(!isPaused)}>
+              {isPaused ? 'Resume Slideshow' : 'Pause Slideshow'}
+            </button>
+
+            <button
+              onClick={() =>
+                document.getElementById('live-display').requestFullscreen()
+              }
+            >
+              Full Screen
+            </button>
+          </div>
+        </section>
+
+        <section className="saved-wishes">
+          <h3>Saved Wedding Wishes</h3>
+
+          <div className="collection-buttons">
+            <button onClick={() => {
+              setSelectedRecipient('All')
+              setCurrentWishIndex(0)
+            }}>
+              All Wishes
+            </button>
+
+            <button onClick={() => {
+              setSelectedRecipient('Bride')
+              setCurrentWishIndex(0)
+            }}>
+              Bride
+            </button>
+
+            <button onClick={() => {
+              setSelectedRecipient('Groom')
+              setCurrentWishIndex(0)
+            }}>
+              Groom
+            </button>
+
+            <button onClick={() => {
+              setSelectedRecipient('Couple')
+              setCurrentWishIndex(0)
+            }}>
+              Couple
+            </button>
+          </div>
+
+          {filteredWishes.length === 0 ? (
+            <p>No wishes have been shared yet.</p>
+          ) : (
+            filteredWishes.map((wish) => (
+              <div className="wish-card" key={wish.id}>
+                <h4>{wish.guestName}</h4>
+                <p>{wish.message}</p>
+                <small>{wish.recipient}</small>
+              </div>
+            ))
+          )}
+        </section>
       </>
-    ) : (
-      <p>Wedding wishes will appear here.</p>
     )}
-  </div>
 
- 
-<div className="slideshow-controls">
-  <button
-    onClick={showPreviousWish}
-    disabled={filteredWishes.length === 0}
-  >
-    Previous
-  </button>
-
-  <button
-    className="next-button"
-    onClick={showNextWish}
-    disabled={filteredWishes.length === 0}
-  >
-    Next Wish 
-  </button>
-
-  <button onClick={() => setIsPaused(!isPaused)}>
-    {isPaused ? 'Resume Slideshow' : 'Pause Slideshow'}
-  </button>
-
-  <button
-    onClick={() =>
-      document.getElementById('live-display').requestFullscreen()
-    }
-  >
-    Full Screen
-  </button>
-</div>
- 
-</section>
-
+    {!isMC && (
       <main>
         <section className="hero" id="home">
           <p className="eyebrow">A DAY WORTH REMEMBERING</p>
@@ -170,7 +223,7 @@ function showNextWish() {
 
           <div className="hero-buttons">
             <a href="#send-wish" className="primary-button">
-              Send your wishes 
+              Send your wishes
             </a>
 
             <a href="#how-it-works" className="secondary-button">
@@ -187,17 +240,15 @@ function showNextWish() {
           <p className="eyebrow">MORE THAN A GUESTBOOK</p>
           <h2>Your message belongs in their story</h2>
           <p>
-           Leave the couple a message they can look back on whenever
-           they want to remember this day.
+            Leave the couple a message they can look back on whenever
+            they want to remember this day.
           </p>
         </section>
 
         <section className="wish-section" id="send-wish">
           <p className="eyebrow">LEAVE A LOVING MESSAGE</p>
-          <h2>Send your wedding wishes </h2>
-          <p>
-            Share a heartfelt message with the happy couple.
-          </p>
+          <h2>Send your wedding wishes</h2>
+          <p>Share a heartfelt message with the happy couple.</p>
 
           <form className="wish-form" onSubmit={handleSubmit}>
             <label htmlFor="guestName">Your name</label>
@@ -231,58 +282,27 @@ function showNextWish() {
               required
             />
 
-           <button type="submit" className="submit-button">
-  Send my wishes 
-</button>
+            <button type="submit" className="submit-button">
+              Send my wishes
+            </button>
 
             {success && (
               <p className="success-message" role="status">
-                Thank you, Your beautiful wish has been Recieved. 
+                Thank you, Your beautiful wish has been received.
               </p>
-            )}           
+            )}
           </form>
-
-          <div className="saved-wishes">
-  <h3>Saved Wedding Wishes</h3>
-
-  <div className="collection-buttons">
-  <button onClick={() => setSelectedRecipient('All')}>
-    All Wishes
-  </button>
-
-  <button onClick={() => setSelectedRecipient('Bride')}>
-    Bride
-  </button>
-
-  <button onClick={() => setSelectedRecipient('Groom')}>
-    Groom
-  </button>
-
-  <button onClick={() => setSelectedRecipient('Couple')}>
-    Couple
-  </button>
-</div>
-
-  {filteredWishes.length === 0 ? (
-    <p>No wishes have been shared yet.</p>
-  ) : (
-    filteredWishes.map((wish) => (
-      <div className="wish-card" key={wish.id}>
-        <h4>{wish.guestName}</h4>
-        <p>{wish.message}</p>
-        <small> {wish.recipient}</small>
-      </div>
-    ))
-  )}
-</div>
         </section>
       </main>
+    )}
 
-      <footer>
-        <p>VowMemories © 2026. Made with love </p>
-      </footer>
-    </div>
-  )
+    <footer>
+      <p>VowMemories © 2026. Made with love.</p>
+    </footer>
+  </div>
+)
 }
 
 export default App
+
+   
