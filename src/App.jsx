@@ -7,6 +7,7 @@ function App() {
   const [recipient, setRecipient] = useState("Couple");
   const [message, setMessage] = useState("");
   const [success, setSuccess] = useState(false);
+  const [showPreview, setShowPreview] = useState(false)
 
   const [wishes, setWishes] = useState(() => {
     return JSON.parse(localStorage.getItem("vowmemories-wishes") || "[]");
@@ -40,7 +41,9 @@ function App() {
     setRecipient("Couple");
     setMessage("");
     setSuccess(true);
+    setShowPreview(false);
   }
+  
   const filteredWishes =
     selectedRecipient === "All"
       ? wishes
@@ -247,48 +250,82 @@ function App() {
             <h2>Send your wedding wishes</h2>
             <p>Share a heartfelt message with the happy couple.</p>
 
-            <form className="wish-form" onSubmit={handleSubmit}>
-              <label htmlFor="guestName">Your name</label>
-              <input
-                id="guestName"
-                type="text"
-                placeholder="Enter your name"
-                value={guestName}
-                onChange={(event) => setGuestName(event.target.value)}
-                required
-              />
+<form className="wish-form" onSubmit={handleSubmit}>
+  {!showPreview ? (
+    <>
+      <label htmlFor="guestName">Your name</label>
+      <input
+        id="guestName"
+        type="text"
+        placeholder="Enter your name"
+        value={guestName}
+        onChange={(event) => setGuestName(event.target.value)}
+        required
+      />
 
-              <label htmlFor="recipient">Who is your message for?</label>
-              <select
-                id="recipient"
-                value={recipient}
-                onChange={(event) => setRecipient(event.target.value)}
-              >
-                <option value="Bride">Bride</option>
-                <option value="Groom">Groom</option>
-                <option value="Couple">Both, the happy couple</option>
-              </select>
+      <label htmlFor="recipient">Who is your message for?</label>
+      <select
+        id="recipient"
+        value={recipient}
+        onChange={(event) => setRecipient(event.target.value)}
+      >
+        <option value="Bride">Bride</option>
+        <option value="Groom">Groom</option>
+        <option value="Couple">Both, the happy couple</option>
+      </select>
 
-              <label htmlFor="message">Your wedding wish</label>
-              <textarea
-                id="message"
-                placeholder="Write your beautiful message here..."
-                rows="5"
-                value={message}
-                onChange={(event) => setMessage(event.target.value)}
-                required
-              />
+      <label htmlFor="message">Your wedding wish</label>
+      <textarea
+        id="message"
+        placeholder="Write your beautiful message here..."
+        rows="5"
+        value={message}
+        onChange={(event) => setMessage(event.target.value)}
+        required
+      />
 
-              <button type="submit" className="submit-button">
-                Send my wishes
-              </button>
+      <button
+        type="button"
+        className="submit-button"
+        onClick={() => {
+          if (guestName.trim() && message.trim()) {
+            setShowPreview(true)
+          } else {
+            alert('Please enter your name and wedding wish first.')
+          }
+        }}
+      >
+        Preview Your Wish
+      </button>
+    </>
+  ) : (
+    <div className="wish-preview">
+      <h3>Preview Your Wedding Wish</h3>
 
-              {success && (
-                <p className="success-message" role="status">
-                  Thank you! Your beautiful wish has been received.
-                </p>
-              )}
-            </form>
+      <p><strong>From:</strong> {guestName}</p>
+      <p><strong>To:</strong> {recipient}</p>
+      <p><strong>Your message:</strong></p>
+      <p>{message}</p>
+
+      <button
+        type="button"
+        onClick={() => setShowPreview(false)}
+      >
+        Edit Message
+      </button>
+
+      <button type="submit" className="submit-button">
+        Submit Wish
+      </button>
+    </div>
+  )}
+
+  {success && (
+    <p className="success-message" role="status">
+      Thank you! Your beautiful wish has been received.
+    </p>
+  )}
+</form>
           </section>
         </main>
       )}
