@@ -231,13 +231,13 @@ function showNextWish() {
               required
             />
 
-            <button type="submit" className="primary-button">
-              Send my wishes 
-            </button>
+           <button type="submit" className="submit-button">
+  Send my wishes 
+</button>
 
             {success && (
               <p className="success-message" role="status">
-                Thank you, Your beautiful wish has been saved. 
+                Thank you, Your beautiful wish has been Recieved. 
               </p>
             )}           
           </form>

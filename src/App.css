@@ -154,6 +154,25 @@ nav a:hover {
   color: #49382d;
 }
 
+.primary-button {
+  display: inline-block;
+  padding: 14px 30px;
+  background-color: #b89560;
+  color: #ffffff;
+  border: 1px solid #b89560;
+  border-radius: 30px;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.primary-button:hover {
+  background-color: #967344;
+  border-color: #967344;
+  color: #ffffff;
+  transform: translateY(-2px);
+}
+
 .hero-note {
   margin-top: 42px;
   color: #f8eee2;
@@ -545,4 +564,30 @@ footer {
 
 .next-button:hover {
   background-color: #967344;
+}
+
+.submit-button {
+  display: block;
+  width: fit-content;
+  min-width: 190px;
+  padding: 12px 24px;
+  margin: 12px auto 0;
+  background: #b89560;
+  color: #ffffff;
+  border: none;
+  border-radius: 30px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+ transition: background 0.3s ease, transform 0.3s ease;
+}
+
+.submit-button:hover {
+  background: #967344;
+  transform: translateY(-2px);
+}
+
+.submit-button:active {
+  transform: translateY(0);
 }
