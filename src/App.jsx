@@ -100,25 +100,22 @@ function App() {
 
       {isMC && (
         <>
-          
-<section className="slideshow-section" id="live-display">
+
+ <section className="slideshow-section" id="live-display">
 
   <div className="slideshow-header">
     <div className="slideshow-logo">
-      <span className="logo-hearts">♡</span>
       <h1>VowMemories</h1>
     </div>
 
-    <p className="slideshow-tagline">
-      SHARE · CELEBRATE · REMEMBER
-    </p>
-
-    <span className="slideshow-divider">♡</span>
-    <p className="eyebrow">THE WEDDING CELEBRATION</p>
     <h2>Live Wedding Wishes</h2>
-    <p>Beautiful words to treasure forever.</p>
-  </div>
 
+    <p className="live-indicator">
+      <span className="live-dot"></span>
+      LIVE 
+    </p>
+  </div>
+  
   <div className="slideshow-card">
     {currentWish ? (
       <>
@@ -138,30 +135,66 @@ function App() {
 
   <div className="slideshow-controls">
 
-    <button
-      type="button"
-      onClick={showPreviousWish}
-      disabled={filteredWishes.length === 0}
-    >
-      <span>‹</span> Previous
-    </button>
+<button
+  type="button"
+  className="slide-control"
+  onClick={showPreviousWish}
+  disabled={filteredWishes.length === 0}
+  aria-label="Previous wish"
+>
+  <svg
+    viewBox="0 0 24 24"
+    width="18"
+    height="18"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M19 12H5" />
+    <path d="m12 5-7 7 7 7" />
+  </svg>
 
-    <button
-      type="button"
-      onClick={() => setIsPaused(!isPaused)}
-      disabled={filteredWishes.length === 0}
-    >
-      <span>{isPaused ? "▶" : "Ⅱ"}</span>
-      {isPaused ? "Resume" : "Pause"}
-    </button>
+  <span>Previous</span>
+</button>
 
-    <button
-      type="button"
-      onClick={showNextWish}
-      disabled={filteredWishes.length === 0}
-    >
-      Next <span>›</span>
-    </button>
+<button
+  type="button"
+  className="slide-control pause-control"
+  onClick={() => setIsPaused(!isPaused)}
+  disabled={filteredWishes.length === 0}
+  aria-label={isPaused ? "Resume slideshow" : "Pause slideshow"}
+>
+  <span className="button-play-icon">
+    {isPaused ? "▶" : "Ⅱ"}
+  </span>
+  <span>{isPaused ? "Resume" : "Pause"}</span>
+</button>
+
+   <button
+  type="button"
+  className="slide-control"
+  onClick={showNextWish}
+  disabled={filteredWishes.length === 0}
+  aria-label="Next wish"
+>
+  <span>Next</span>
+
+  <svg
+    viewBox="0 0 24 24"
+    width="18"
+    height="18"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M5 12h14" />
+    <path d="m12 5 7 7-7 7" />
+  </svg>
+</button>
 
     <button
       type="button"
@@ -175,11 +208,8 @@ function App() {
   </div>
 
   <div className="slideshow-footer">
-    <span>♡</span>
-    <p>MADE WITH LOVE · VOWMEMORIES</p>
-    <span>♡</span>
+    <p>VOWMEMORIES . CELEBRATING LOVE</p>
   </div>
-
 </section>
 
           <section className="saved-wishes">
