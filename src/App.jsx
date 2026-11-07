@@ -100,53 +100,87 @@ function App() {
 
       {isMC && (
         <>
-          <section className="slideshow-section" id="live-display">
-            <p className="eyebrow">THE WEDDING CELEBRATION</p>
-            <h2>Live Wedding Wishes</h2>
-            <p>Beautiful words to treasure forever.</p>
+          
+<section className="slideshow-section" id="live-display">
 
-            <div className="slideshow-card">
-              {currentWish ? (
-                <>
-                  <span className="slideshow-heart"></span>
-                  <h3>{currentWish.guestName}</h3>
-                  <p className="slideshow-message">"{currentWish.message}"</p>
-                  <small>With love, for {currentWish.recipient}</small>
-                </>
-              ) : (
-                <p>Wedding wishes will appear here.</p>
-              )}
-            </div>
+  <div className="slideshow-header">
+    <div className="slideshow-logo">
+      <span className="logo-hearts">♡</span>
+      <h1>VowMemories</h1>
+    </div>
 
-            <div className="slideshow-controls">
-              <button
-                onClick={showPreviousWish}
-                disabled={filteredWishes.length === 0}
-              >
-                Previous
-              </button>
+    <p className="slideshow-tagline">
+      SHARE · CELEBRATE · REMEMBER
+    </p>
 
-              <button
-                className="next-button"
-                onClick={showNextWish}
-                disabled={filteredWishes.length === 0}
-              >
-                Next Wish
-              </button>
+    <span className="slideshow-divider">♡</span>
+    <p className="eyebrow">THE WEDDING CELEBRATION</p>
+    <h2>Live Wedding Wishes</h2>
+    <p>Beautiful words to treasure forever.</p>
+  </div>
 
-              <button onClick={() => setIsPaused(!isPaused)}>
-                {isPaused ? "Resume Slideshow" : "Pause Slideshow"}
-              </button>
+  <div className="slideshow-card">
+    {currentWish ? (
+      <>
+        <span className="slideshow-heart">♡</span>
+        <p className="wish-label">A MESSAGE OF LOVE</p>
+        <h3>{currentWish.guestName}</h3>
+        <span className="wish-divider">♡</span>
+        <p className="slideshow-message">
+          "{currentWish.message}"
+        </p>
+        <small>With love, for {currentWish.recipient}</small>
+      </>
+    ) : (
+      <p>Wedding wishes will appear here.</p>
+    )}
+  </div>
 
-              <button
-                onClick={() =>
-                  document.getElementById("live-display").requestFullscreen()
-                }
-              >
-                Full Screen
-              </button>
-            </div>
-          </section>
+  <div className="slideshow-controls">
+
+    <button
+      type="button"
+      onClick={showPreviousWish}
+      disabled={filteredWishes.length === 0}
+    >
+      <span>‹</span> Previous
+    </button>
+
+    <button
+      type="button"
+      onClick={() => setIsPaused(!isPaused)}
+      disabled={filteredWishes.length === 0}
+    >
+      <span>{isPaused ? "▶" : "Ⅱ"}</span>
+      {isPaused ? "Resume" : "Pause"}
+    </button>
+
+    <button
+      type="button"
+      onClick={showNextWish}
+      disabled={filteredWishes.length === 0}
+    >
+      Next <span>›</span>
+    </button>
+
+    <button
+      type="button"
+      onClick={() =>
+        document.getElementById("live-display").requestFullscreen()
+      }
+    >
+      <span>⛶</span> Full Screen
+    </button>
+
+  </div>
+
+  <div className="slideshow-footer">
+    <span>♡</span>
+    <p>MADE WITH LOVE · VOWMEMORIES</p>
+    <span>♡</span>
+  </div>
+
+</section>
 
           <section className="saved-wishes">
             <h3>Saved Wedding Wishes</h3>
@@ -253,15 +287,17 @@ function App() {
 <form className="wish-form" onSubmit={handleSubmit}>
   {!showPreview ? (
     <>
-      <label htmlFor="guestName">Your name</label>
-      <input
-        id="guestName"
-        type="text"
-        placeholder="Enter your name"
-        value={guestName}
-        onChange={(event) => setGuestName(event.target.value)}
-        required
-      />
+     <label htmlFor="guest-display-name">Your name</label>
+<input
+  id="guest-display-name"
+  name="guest-display-name"
+  type="text"
+  placeholder="Enter your name"
+  autoComplete="new-password"
+  value={guestName}
+  onChange={(event) => setGuestName(event.target.value)}
+  required
+/> 
 
       <label htmlFor="recipient">Who is your message for?</label>
       <select
