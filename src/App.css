@@ -92,7 +92,9 @@ nav a:hover {
       rgba(35, 25, 20, 0.55),
       rgba(35, 25, 20, 0.65)
     ),
-    url('/wedding-background.jpg') center/cover no-repeat;
+    url('/wedding-hero.jpg') center/cover no-repeat;
+    width: 100%;
+margin: 0 auto;
 }
 
 .hero .eyebrow {
@@ -114,6 +116,9 @@ nav a:hover {
   line-height: 1.2;
   font-weight: 500;
   color: #fffaf3;
+  width: 100%;
+text-align: center;
+margin: 0 auto;
 }
 
 .hero h1 span {
@@ -435,7 +440,7 @@ nav a:hover {
       rgba(35, 25, 20, 0.55),
       rgba(35, 25, 20, 0.65)
     ),
-    url('/public/wedding-background.jpg') center/cover no-repeat;
+    url('/wedding-background.jpg') center/cover no-repeat;
   text-align: center;
 }
 
@@ -561,17 +566,17 @@ footer {
     justify-content: center;
     gap: 20px;
   }
-}
 
   .hero {
     min-height: 570px;
     padding: 85px 18px;
-  background: linear-gradient(
-    rgba(35, 25, 20, 0.55),
-    rgba(35, 25, 20, 0.65)
-  ),
-  url('wedding-hero.jpg') center/cover no-repeat;
-  
+    background:
+      linear-gradient(
+        rgba(35, 25, 20, 0.55),
+        rgba(35, 25, 20, 0.65)
+      ),
+      url('/wedding-hero.jpg') center/cover no-repeat;
+  }
 
   .hero-description {
     font-size: 14px;
@@ -790,7 +795,6 @@ footer {
   cursor: pointer;
 }
 
-/* Classic Ivory */
 .slideshow-section.theme-classic {
   background:
     linear-gradient(
@@ -800,7 +804,6 @@ footer {
     url('/wedding-background.jpg') center/cover no-repeat;
 }
 
-/* Champagne Gold */
 .slideshow-section.theme-champagne {
   background:
     linear-gradient(
@@ -809,8 +812,6 @@ footer {
     ),
     url('/wedding-background.jpg') center/cover no-repeat;
 }
-
-/* Sage Elegance */
 .slideshow-section.theme-sage {
   background:
     linear-gradient(
