@@ -8,13 +8,14 @@ function App() {
   const [message, setMessage] = useState("");
   const [success, setSuccess] = useState(false);
   const [showPreview, setShowPreview] = useState(false)
-
   const [wishes, setWishes] = useState(() => {
     return JSON.parse(localStorage.getItem("vowmemories-wishes") || "[]");
   });
   const [selectedRecipient, setSelectedRecipient] = useState("All");
   const [currentWishIndex, setCurrentWishIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(true);
+  const [showControls, setShowControls] = useState(true);
+  const [selectedTheme, setSelectedTheme] = useState("classic");
 
   function handleSubmit(event) {
     event.preventDefault();
@@ -45,9 +46,17 @@ function App() {
   }
   
   const filteredWishes =
-    selectedRecipient === "All"
-      ? wishes
-      : wishes.filter((wish) => wish.recipient === selectedRecipient);
+  selectedRecipient === "All"
+    ? wishes.filter((wish) => wish.approved === true)
+    : wishes.filter(
+        (wish) =>
+          wish.recipient === selectedRecipient &&
+          wish.approved === true
+      );
+
+      const pendingWishes = wishes.filter(
+  (wish) => wish.approved !== true
+);
 
   const currentWish =
     filteredWishes.length > 0
@@ -101,8 +110,10 @@ function App() {
       {isMC && (
         <>
 
- <section className="slideshow-section" id="live-display">
-
+<section
+  className={`slideshow-section theme-${selectedTheme}`}
+  id="live-display"
+>
   <div className="slideshow-header">
     <div className="slideshow-logo">
       <h1>VowMemories</h1>
@@ -115,14 +126,28 @@ function App() {
       LIVE 
     </p>
   </div>
+
+    <div className="theme-selector">
+    <label htmlFor="theme">Presentation Theme:</label>
+
+    <select
+      id="theme"
+      value={selectedTheme}
+      onChange={(e) => setSelectedTheme(e.target.value)}
+    >
+      <option value="classic">Classic Ivory</option>
+      <option value="champagne">Champagne Gold</option>
+      <option value="sage">Sage Elegance</option>
+    </select>
+  </div>
   
   <div className="slideshow-card">
     {currentWish ? (
       <>
-        <span className="slideshow-heart">♡</span>
+        <span className="slideshow-heart"></span>
         <p className="wish-label">A MESSAGE OF LOVE</p>
         <h3>{currentWish.guestName}</h3>
-        <span className="wish-divider">♡</span>
+        <span className="wish-divider"></span>
         <p className="slideshow-message">
           "{currentWish.message}"
         </p>
@@ -143,6 +168,8 @@ function App() {
 
   <div className="slideshow-controls">
 
+{showControls && (
+  <>
 <button
   type="button"
   className="slide-control"
@@ -212,7 +239,16 @@ function App() {
     >
       <span>⛶</span> Full Screen
     </button>
-
+  </>
+)}
+<button
+  type="button"
+  className="slide-control"
+  onClick={() => setShowControls(!showControls)}
+  aria-expanded={showControls}
+>
+  {showControls ? "Hide Controls" : "Show Controls"}
+</button>
   </div>
 
   <div className="slideshow-footer">
@@ -222,6 +258,54 @@ function App() {
 
           <section className="saved-wishes">
             <h3>Saved Wedding Wishes</h3>
+            <h3>Wishes Awaiting Approval ({pendingWishes.length})</h3>
+            {pendingWishes.length === 0 ? (
+  <p>No wishes are waiting for approval.</p>
+) : (
+  pendingWishes.map((wish) => (
+    <div className="wish-card" key={wish.id}>
+      <h4>{wish.guestName}</h4>
+      <p>{wish.message}</p>
+      <small>{wish.recipient}</small>
+
+      <div className="moderation-buttons">
+        <button
+          onClick={() => {
+            const updatedWishes = wishes.map((item) =>
+              item.id === wish.id
+                ? { ...item, approved: true }
+                : item
+            );
+
+            setWishes(updatedWishes);
+            localStorage.setItem(
+              "wishes",
+              JSON.stringify(updatedWishes)
+            );
+          }}
+        >
+          Approve
+        </button>
+
+        <button
+          onClick={() => {
+            const updatedWishes = wishes.filter(
+              (item) => item.id !== wish.id
+            );
+
+            setWishes(updatedWishes);
+            localStorage.setItem(
+              "wishes",
+              JSON.stringify(updatedWishes)
+            );
+          }}
+        >
+          Reject
+        </button>
+      </div>
+    </div>
+  ))
+)}
 
             <div className="collection-buttons">
               <button
