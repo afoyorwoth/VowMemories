@@ -133,6 +133,14 @@ function App() {
     )}
   </div>
 
+  <div className="message-counter">
+  <span>
+    Message {filteredWishes.length > 0 ? currentWishIndex % filteredWishes.length + 1 : 0}
+  </span>
+  <span className="counter-divider">/</span>
+  <span>{filteredWishes.length}</span>
+</div>
+
   <div className="slideshow-controls">
 
 <button
