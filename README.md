@@ -1,12 +1,14 @@
-# VowMemories 
+# VowMemories
 
 ### A Digital Wedding Guestbook
 
-VowMemories is a website where wedding guests can leave messages for the bride and groom, even when they don't get the chance to meet them during the celebration.
+**Every wish deserves to be remembered.**
 
-The idea came from something that happens at many weddings: the day gets busy, guests are caught up in the celebrations, and some never get a moment to personally share their wishes with the couple.
+VowMemories is a web-based digital wedding guestbook that gives guests an opportunity to share heartfelt messages with a couple, even when they do not get the chance to meet them personally during the celebration.
 
-VowMemories gives them another way to do that.
+The idea came from something that happens at many weddings: the day gets busy, guests are caught up in the celebrations, and some leave without sharing their congratulations or personal messages.
+
+VowMemories provides another way for those messages to be shared, reviewed and displayed during the celebration.
 
 ## 1. The Problem
 
@@ -14,41 +16,51 @@ A wedding day can be very busy. Between the ceremony, photography, entertainment
 
 Some guests leave without sharing their congratulations or personal messages. Others may not get the opportunity to write in a traditional guestbook.
 
-I wanted to create a simple way for those messages to still be shared and kept.
+VowMemories aims to provide a simple digital alternative.
 
 ## 2. The Solution
 
-VowMemories allows guests to open a wedding page using a website link or QR code and leave a message for the bride, groom or both.
+VowMemories allows guests to visit a wedding page and leave personal messages through an online form.
 
-Before sending, guests can preview their message and make changes if needed.
+Guests can preview their messages before submitting them. The MC has a separate page where submitted messages can be reviewed, approved or rejected. Approved wishes can then be displayed during the event using a slideshow.
 
-There is also a separate page for the MC to display the saved wishes during the celebration.
+## 3. Key Features
 
-## 3. What the Website Can Do
+### Guest Page
 
-**Guest page**
-- Enter a name.
-- Choose Bride, Groom or Couple.
-- Write a wedding message.
-- Preview the message before submitting.
-- Edit the message before sending.
-- Receive a confirmation after submission.
+- Welcoming wedding-themed homepage.
+- Guest name and message input fields.
+- Message preview before submission.
+- Option to edit a message before submitting.
+- Submission confirmation.
 
-**MC page**
-- Open a separate presentation page at `/mc`.
-- View saved wedding wishes.
-- Filter wishes by recipient.
-- Move between messages.
-- Pause and resume the slideshow.
-- Display messages in full-screen mode.
+### MC Dashboard
 
-**Other features**
-- Responsive design for different screen sizes.
-- Wedding photography and an elegant wedding-themed layout.
-- QR code for accessing the guest page.
-- LocalStorage for saving submitted wishes.
+- View total, pending and approved messages.
+- Review submitted messages.
+- Approve or reject messages.
+- View approved messages.
 
-## 4. Tools and Technologies
+### MC Presentation Page
+
+- Separate presentation page at `/mc`.
+- Display approved messages.
+- Automatic slideshow with five-second intervals when playing.
+- Previous and next navigation.
+- Pause and resume controls.
+- Full-screen display option.
+- Three presentation themes:
+  - Classic Ivory
+  - Champagne Gold
+  - Sage Elegance
+
+### Additional Features
+
+- Responsive interface for different screen sizes.
+- Wedding photography and elegant visual styling.
+- LocalStorage for saving messages and moderation changes.
+
+## 4. Technologies Used
 
 - HTML5
 - CSS3
@@ -56,71 +68,73 @@ There is also a separate page for the MC to display the saved wishes during the 
 - React
 - Vite
 - Browser LocalStorage
+- Git and GitHub
+- Vercel
 
 ## 5. How to Use VowMemories
 
-**For guests**
+### For Guests
 
-1. Open the website using the link or QR code.
+1. Open the guest website.
 2. Enter your name.
-3. Choose who the message is for.
-4. Write your wedding wish.
-5. Click Preview Your Wish.
-6. Review it and select Edit Message if you want to make changes.
-7. Click Submit Wish when you are ready.
+3. Write your wedding message.
+4. Preview your message.
+5. Edit it if necessary.
+6. Submit your wish.
 
-**For the MC**
+### For the MC
 
-1. Open the `/mc` page.
-2. View the available saved messages.
-3. Filter messages by recipient.
-4. Use the presentation controls to display them.
-
-- **Automatic Slideshow:** Displays each wedding wish for 5 seconds before moving to the next message.
-- **Slideshow Controls:** The MC can pause, resume, and navigate between wishes manually.
+1. Open the MC page using `/mc`.
+2. Review messages in the dashboard.
+3. Approve or reject pending messages.
+4. Open the presentation view.
+5. Display approved wishes using the slideshow controls.
+6. Select a preferred presentation theme.
 
 ## 6. Testing
 
-I tested the following:
+The following areas were included in the project's development and testing process:
 
-- Entering guest details and messages.
-- Selecting the intended recipient.
-- Previewing messages before submission.
-- Editing messages without losing the original text.
-- Submitting messages and displaying the confirmation.
-- Opening and using the MC page.
-- Using the website on a mobile screen.
-- Accessing the deployed website.
+- Guest name and message input.
+- Message preview and editing.
+- Message submission and confirmation.
+- Saving messages in LocalStorage.
+- MC dashboard message summaries.
+- Message approval and rejection.
+- Approved message display.
+- Slideshow navigation and controls.
+- Theme selection.
+- Responsive layout.
+- Production build and deployed website access.
 
-## 7. Current Limitation
+## 7. Current Limitations
 
-The project currently uses LocalStorage to save messages.
+The current version uses browser LocalStorage to save messages and moderation changes.
 
-This means wishes are saved in the browser and on the device where they are submitted. They do not automatically appear on another device, including the MC's device.
+Messages are stored locally on the browser and device being used. They are not automatically synchronised across different devices or browsers.
 
-A shared database and real-time connection have not yet been implemented.
+A shared backend database and real-time connection would be needed for multiple devices to access the same event messages reliably.
 
-## 8. What I Would Like to Improve
+## 8. Future Improvements
 
-Given more development time, I would like to:
-
-- Connect the website to a shared database.
-- Make messages appear on the MC screen in real time.
-- Add message moderation.
-- Allow couples to download their wedding messages as a PDF.
+- Integrate a shared database.
+- Enable real-time message synchronisation.
+- Add secure MC authentication.
+- Support multiple wedding events.
+- Allow couples to download their messages as PDF files.
 - Allow guests to include photos or videos.
-- Support more than one wedding event.
+- Add automated data backup and recovery.
 
 ## 9. Project Links
 
-- **Live website:** https://vow-memories.vercel.app
-- **MC page:** https://vow-memories.vercel.app/mc
-- **GitHub:** https://github.com/afoyorwoth/VowMemories
+- **Live Guest Website:** https://vow-memories.vercel.app/
+- **MC Page:** https://vow-memories.vercel.app/mc
+- **GitHub Repository:** https://github.com/afoyorwoth/VowMemories
 
 ## 10. About the Project
 
 VowMemories is my individual frontend development project for the Tech Mentorship Program 2026.
 
-I built it using HTML, CSS, JavaScript and React, with the aim of solving a practical problem through a website.
+The project demonstrates how HTML, CSS, JavaScript and React can be used to develop a practical digital solution to a real-life problem.
 
-*VowMemories Every wish deserves to be remembered.*
+**VowMemories — Every wish deserves to be remembered.**
