@@ -2,20 +2,34 @@
 import { useState, useEffect } from "react";
 import "./App.css";
 
+const STORAGE_KEY = "vowmemories-wishes";
+
+// Safely load saved wishes from the browser
+function loadWishes() {
+  try {
+    const savedWishes = localStorage.getItem(STORAGE_KEY);
+    return savedWishes ? JSON.parse(savedWishes) : [];
+  } catch (error) {
+    console.error("Unable to load wedding wishes:", error);
+    return [];
+  }
+}
+
+function saveWishes(wishes) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(wishes));
+}
+
 function App() {
   const isMC = window.location.pathname === "/mc";
 
+  
   const [guestName, setGuestName] = useState("");
   const [recipient, setRecipient] = useState("Couple");
   const [message, setMessage] = useState("");
   const [success, setSuccess] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
 
-  const [wishes, setWishes] = useState(() => {
-    return JSON.parse(
-      localStorage.getItem("vowmemories-wishes") || "[]"
-    );
-  });
+  const [wishes, setWishes] = useState(loadWishes);
 
   const [selectedRecipient, setSelectedRecipient] = useState("All");
   const [currentWishIndex, setCurrentWishIndex] = useState(0);
@@ -23,63 +37,82 @@ function App() {
   const [showControls, setShowControls] = useState(true);
   const [selectedTheme, setSelectedTheme] = useState("classic");
 
-  function handleSubmit(event) {
-    event.preventDefault();
-
-    const newWish = {
-      id: Date.now(),
-      guestName,
-      recipient,
-      message,
-      approved: false,
-      date: new Date().toISOString(),
-    };
-
-    const savedWishes = JSON.parse(
-      localStorage.getItem("vowmemories-wishes") || "[]"
-    );
-
-    savedWishes.push(newWish);
-
-    setWishes(savedWishes);
-
-    localStorage.setItem(
-      "vowmemories-wishes",
-      JSON.stringify(savedWishes)
-    );
-
-    setGuestName("");
-    setRecipient("Couple");
-    setMessage("");
-    setSuccess(true);
-    setShowPreview(false);
-  }
-
-  const filteredWishes =
-    selectedRecipient === "All"
-      ? wishes.filter((wish) => wish.approved === true)
-      : wishes.filter(
-          (wish) =>
-            wish.recipient === selectedRecipient &&
-            wish.approved === true
-        );
+  const approvedWishes = wishes.filter(
+    (wish) => wish.approved === true
+  );
 
   const pendingWishes = wishes.filter(
     (wish) => wish.approved !== true
   );
 
-  // Get the current slideshow wish
+  const filteredWishes =
+    selectedRecipient === "All"
+      ? approvedWishes
+      : approvedWishes.filter(
+          (wish) => wish.recipient === selectedRecipient
+        );
+
   const currentWish =
     filteredWishes.length > 0
       ? filteredWishes[currentWishIndex % filteredWishes.length]
       : null;
 
-  // Show the previous wish
+  function handleSubmit(event) {
+    event.preventDefault();
+
+    if (!guestName.trim() || !message.trim()) {
+      window.alert("Please enter your name and wedding wish.");
+      return;
+    }
+
+    const newWish = {
+      id: Date.now(),
+      guestName: guestName.trim(),
+      recipient,
+      message: message.trim(),
+      approved: false,
+      date: new Date().toISOString(),
+    };
+
+    const updatedWishes = [...wishes, newWish];
+
+    setWishes(updatedWishes);
+    saveWishes(updatedWishes);
+
+    setGuestName("");
+    setRecipient("Couple");
+    setMessage("");
+    setShowPreview(false);
+    setSuccess(true);
+  }
+
+  // Approve a guest wish
+  function handleApprove(wishId) {
+    const updatedWishes = wishes.map((wish) =>
+      wish.id === wishId
+        ? { ...wish, approved: true }
+        : wish
+    );
+
+    setWishes(updatedWishes);
+    saveWishes(updatedWishes);
+  }
+
+  function handleReject(wishId) {
+    const updatedWishes = wishes.filter(
+      (wish) => wish.id !== wishId
+    );
+
+    setWishes(updatedWishes);
+    saveWishes(updatedWishes);
+  }
+
   function showPreviousWish() {
     if (filteredWishes.length === 0) return;
 
     setCurrentWishIndex(
-      (currentWishIndex - 1 + filteredWishes.length) %
+      (previousIndex) =>
+        (previousIndex - 1 + filteredWishes.length) %
         filteredWishes.length
     );
   }
@@ -88,7 +121,8 @@ function App() {
     if (filteredWishes.length === 0) return;
 
     setCurrentWishIndex(
-      (currentWishIndex + 1) % filteredWishes.length
+      (previousIndex) =>
+        (previousIndex + 1) % filteredWishes.length
     );
   }
 
@@ -107,17 +141,20 @@ function App() {
     return () => clearInterval(timer);
   }, [isPaused, filteredWishes.length]);
 
+  useEffect(() => {
+    setCurrentWishIndex(0);
+  }, [selectedRecipient]);
+
   return (
     <div className="app">
 
-      {/* Navigation */}
       <header className="navbar">
         <a href="/" className="logo">
           VowMemories<span>.</span>
         </a>
 
         {!isMC && (
-          <nav>
+          <nav aria-label="Main navigation">
             <a href="#home">Home</a>
             <a href="#how-it-works">How it works</a>
             <a href="#send-wish">Share a Wish</a>
@@ -125,13 +162,14 @@ function App() {
         )}
       </header>
 
-      {/* MC Presentation Page */}
       {isMC && (
-        <>
+        <main className="mc-page">
+
           <section
             className={`slideshow-section theme-${selectedTheme}`}
             id="live-display"
           >
+
             <div className="slideshow-header">
               <div className="slideshow-logo">
                 <h1>VowMemories</h1>
@@ -145,7 +183,6 @@ function App() {
               </p>
             </div>
 
-            {/* Presentation Theme */}
             <div className="theme-selector">
               <label htmlFor="theme">
                 Presentation Theme:
@@ -154,8 +191,8 @@ function App() {
               <select
                 id="theme"
                 value={selectedTheme}
-                onChange={(e) =>
-                  setSelectedTheme(e.target.value)
+                onChange={(event) =>
+                  setSelectedTheme(event.target.value)
                 }
               >
                 <option value="classic">Classic Ivory</option>
@@ -164,11 +201,11 @@ function App() {
               </select>
             </div>
 
-            {/* Slideshow */}
             <div className="slideshow-card">
               {currentWish ? (
                 <>
-                  <span className="slideshow-heart"></span>
+                  <span className="slideshow-heart">
+                  </span>
 
                   <p className="wish-label">
                     A MESSAGE OF LOVE
@@ -187,11 +224,13 @@ function App() {
                   </small>
                 </>
               ) : (
-                <p>Wedding wishes will appear here.</p>
+                <p>
+                  Wedding wishes will appear here once they
+                  have been approved.
+                </p>
               )}
             </div>
 
-            {/* Message Counter */}
             <div className="message-counter">
               <span>
                 Message{" "}
@@ -205,8 +244,8 @@ function App() {
               <span>{filteredWishes.length}</span>
             </div>
 
-            {/* Slideshow Controls */}
             <div className="slideshow-controls">
+
               {showControls && (
                 <>
                   <button
@@ -233,6 +272,7 @@ function App() {
                     <span>Previous</span>
                   </button>
 
+
                   <button
                     type="button"
                     className="slide-control pause-control"
@@ -252,6 +292,7 @@ function App() {
                       {isPaused ? "Resume" : "Pause"}
                     </span>
                   </button>
+
 
                   <button
                     type="button"
@@ -277,18 +318,27 @@ function App() {
                     </svg>
                   </button>
 
+
                   <button
                     type="button"
-                    onClick={() =>
-                      document
-                        .getElementById("live-display")
-                        .requestFullscreen()
-                    }
+                    onClick={() => {
+                      const display = document.getElementById(
+                        "live-display"
+                      );
+
+                      if (
+                        display &&
+                        display.requestFullscreen
+                      ) {
+                        display.requestFullscreen();
+                      }
+                    }}
                   >
                     <span>⛶</span> Full Screen
                   </button>
                 </>
               )}
+
 
               <button
                 type="button"
@@ -300,135 +350,170 @@ function App() {
                   ? "Hide Controls"
                   : "Show Controls"}
               </button>
+
             </div>
 
-            {/* Slideshow Footer */}
+
             <div className="slideshow-footer">
               <p>VOWMEMORIES . CELEBRATING LOVE</p>
             </div>
+
           </section>
 
-          {/* Saved Wishes and Moderation */}
           <section className="saved-wishes">
-            <h3>Saved Wedding Wishes</h3>
 
-            <h3>
-              Wishes Awaiting Approval ({pendingWishes.length})
-            </h3>
+            <div className="dashboard-heading">
+              <p className="eyebrow">WEDDING MANAGEMENT</p>
 
-            {pendingWishes.length === 0 ? (
-              <p>No wishes are waiting for approval.</p>
-            ) : (
-              pendingWishes.map((wish) => (
-                <div className="wish-card" key={wish.id}>
-                  <h4>{wish.guestName}</h4>
+              <h2>Wedding Wishes Dashboard</h2>
 
-                  <p>{wish.message}</p>
-
-                  <small>{wish.recipient}</small>
-
-                  <div className="moderation-buttons">
-                    <button
-                      onClick={() => {
-                        const updatedWishes = wishes.map(
-                          (item) =>
-                            item.id === wish.id
-                              ? { ...item, approved: true }
-                              : item
-                        );
-
-                        setWishes(updatedWishes);
-
-                        localStorage.setItem(
-                          "vowmemories-wishes",
-                          JSON.stringify(updatedWishes)
-                        );
-                      }}
-                    >
-                      Approve
-                    </button>
-
-                    <button
-                      onClick={() => {
-                        const updatedWishes = wishes.filter(
-                          (item) => item.id !== wish.id
-                        );
-
-                        setWishes(updatedWishes);
-
-                        localStorage.setItem(
-                          "vowmemories-wishes",
-                          JSON.stringify(updatedWishes)
-                        );
-                      }}
-                    >
-                      Reject
-                    </button>
-                  </div>
-                </div>
-              ))
-            )}
-
-            {/* Wish Categories */}
-            <div className="collection-buttons">
-              <button
-                onClick={() => {
-                  setSelectedRecipient("All");
-                  setCurrentWishIndex(0);
-                }}
-              >
-                All Wishes
-              </button>
-
-              <button
-                onClick={() => {
-                  setSelectedRecipient("Bride");
-                  setCurrentWishIndex(0);
-                }}
-              >
-                Bride
-              </button>
-
-              <button
-                onClick={() => {
-                  setSelectedRecipient("Groom");
-                  setCurrentWishIndex(0);
-                }}
-              >
-                Groom
-              </button>
-
-              <button
-                onClick={() => {
-                  setSelectedRecipient("Couple");
-                  setCurrentWishIndex(0);
-                }}
-              >
-                Couple
-              </button>
+              <p>
+                Review guest messages and choose the wishes
+                that will appear during the celebration.
+              </p>
             </div>
 
-            {filteredWishes.length === 0 ? (
-              <p>No wishes have been shared yet.</p>
-            ) : (
-              filteredWishes.map((wish) => (
-                <div className="wish-card" key={wish.id}>
-                  <h4>{wish.guestName}</h4>
+            <div className="wish-summary">
 
-                  <p>{wish.message}</p>
+              <div className="summary-card">
+                <h3>{wishes.length}</h3>
+                <p>Total Wishes</p>
+              </div>
 
-                  <small>{wish.recipient}</small>
-                </div>
-              ))
-            )}
+              <div className="summary-card">
+                <h3>{pendingWishes.length}</h3>
+                <p>Awaiting Approval</p>
+              </div>
+
+              <div className="summary-card">
+                <h3>{approvedWishes.length}</h3>
+                <p>Approved Wishes</p>
+              </div>
+
+            </div>
+
+            <div className="pending-section">
+
+              <h3>
+                Wishes Awaiting Approval ({pendingWishes.length})
+              </h3>
+
+              {pendingWishes.length === 0 ? (
+                <p>No wishes are waiting for approval.</p>
+              ) : (
+                pendingWishes.map((wish) => (
+                  <div className="wish-card" key={wish.id}>
+
+                    <h4>{wish.guestName}</h4>
+
+                    <p>{wish.message}</p>
+
+                    <small>For: {wish.recipient}</small>
+
+                    <div className="moderation-buttons">
+
+                      <button
+                        type="button"
+                        onClick={() => handleApprove(wish.id)}
+                      >
+                        Approve
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleReject(wish.id)}
+                      >
+                        Reject
+                      </button>
+
+                    </div>
+
+                  </div>
+                ))
+              )}
+
+            </div>
+
+            <div className="approved-section">
+
+              <h3>
+                Saved Wedding Wishes ({approvedWishes.length})
+              </h3>
+
+              <p>
+                Select a category to view approved messages
+                for the slideshow.
+              </p>
+
+              <div className="collection-buttons">
+
+                <button
+                  type="button"
+                  onClick={() => setSelectedRecipient("All")}
+                  aria-pressed={selectedRecipient === "All"}
+                >
+                  All Wishes
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setSelectedRecipient("Bride")}
+                  aria-pressed={selectedRecipient === "Bride"}
+                >
+                  Bride
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setSelectedRecipient("Groom")}
+                  aria-pressed={selectedRecipient === "Groom"}
+                >
+                  Groom
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setSelectedRecipient("Couple")}
+                  aria-pressed={selectedRecipient === "Couple"}
+                >
+                  Couple
+                </button>
+
+              </div>
+
+              {filteredWishes.length === 0 ? (
+                <p>
+                  No approved wishes in this category yet.
+                </p>
+              ) : (
+                filteredWishes.map((wish) => (
+                  <div className="wish-card" key={wish.id}>
+
+                    <h4>{wish.guestName}</h4>
+
+                    <p>{wish.message}</p>
+
+                    <small>For: {wish.recipient}</small>
+
+                  </div>
+                ))
+              )}
+
+            </div>
+
           </section>
-        </>
+
+        </main>
       )}
+
 
       {!isMC && (
         <main>
 
+          {/* Hero Section */}
+
           <section className="hero" id="home">
+
             <p className="eyebrow">
               A DAY WORTH REMEMBERING
             </p>
@@ -448,8 +533,13 @@ function App() {
               celebrations.
             </p>
 
+
             <div className="hero-buttons">
-              <a href="#send-wish" className="primary-button">
+
+              <a
+                href="#send-wish"
+                className="primary-button"
+              >
                 Send your wishes
               </a>
 
@@ -459,18 +549,21 @@ function App() {
               >
                 Discover VowMemories
               </a>
+
             </div>
 
             <div className="hero-note">
-              <span></span> A guestbook filled with love.
+              <span></span>
+              A guestbook filled with love.
             </div>
+
           </section>
 
-          {/* How It Works */}
           <section
             className="how-section"
             id="how-it-works"
           >
+
             <p className="eyebrow">
               MORE THAN A GUESTBOOK
             </p>
@@ -481,13 +574,54 @@ function App() {
               Leave the couple a message they can look back
               on whenever they want to remember this day.
             </p>
+
+
+            <div className="steps-grid">
+
+              <div className="step-card">
+                <span className="step-number">01</span>
+
+                <h3>Write Your Wish</h3>
+
+                <p>
+                  Share your name and write a heartfelt
+                  message for the bride, groom or couple.
+                </p>
+              </div>
+
+
+              <div className="step-card">
+                <span className="step-number">02</span>
+
+                <h3>Preview & Submit</h3>
+
+                <p>
+                  Review your message before submitting
+                  your wedding wish.
+                </p>
+              </div>
+
+
+              <div className="step-card">
+                <span className="step-number">03</span>
+
+                <h3>Celebrate Their Story</h3>
+
+                <p>
+                  Once approved, your message can become
+                  part of the couple's wedding memories.
+                </p>
+              </div>
+
+            </div>
+
           </section>
 
-          {/* Guest Wish Form */}
           <section
             className="wish-section"
             id="send-wish"
           >
+
             <p className="eyebrow">
               LEAVE A LOVING MESSAGE
             </p>
@@ -498,12 +632,17 @@ function App() {
               Share a heartfelt message with the happy couple.
             </p>
 
+
+            {/* Guest Wish Form */}
+
             <form
               className="wish-form"
               onSubmit={handleSubmit}
             >
+
               {!showPreview ? (
                 <>
+
                   <label htmlFor="guest-display-name">
                     Your name
                   </label>
@@ -513,11 +652,12 @@ function App() {
                     name="guest-display-name"
                     type="text"
                     placeholder="Enter your name"
-                    autoComplete="new-password"
+                    autoComplete="name"
                     value={guestName}
-                    onChange={(event) =>
-                      setGuestName(event.target.value)
-                    }
+                    onChange={(event) => {
+                      setGuestName(event.target.value);
+                      setSuccess(false);
+                    }}
                     required
                   />
 
@@ -527,6 +667,7 @@ function App() {
 
                   <select
                     id="recipient"
+                    name="recipient"
                     value={recipient}
                     onChange={(event) =>
                       setRecipient(event.target.value)
@@ -539,19 +680,22 @@ function App() {
                     </option>
                   </select>
 
+
                   <label htmlFor="message">
                     Your wedding wish
                   </label>
 
                   <textarea
                     id="message"
+                    name="message"
                     placeholder="Write your beautiful message here..."
                     rows="5"
                     maxLength={500}
                     value={message}
-                    onChange={(event) =>
-                      setMessage(event.target.value)
-                    }
+                    onChange={(event) => {
+                      setMessage(event.target.value);
+                      setSuccess(false);
+                    }}
                     required
                   />
 
@@ -572,7 +716,7 @@ function App() {
                       ) {
                         setShowPreview(true);
                       } else {
-                        alert(
+                        window.alert(
                           "Please enter your name and wedding wish first."
                         );
                       }
@@ -580,9 +724,12 @@ function App() {
                   >
                     Preview Your Wish
                   </button>
+
                 </>
               ) : (
+
                 <div className="wish-preview">
+
                   <h3>Preview Your Wedding Wish</h3>
 
                   <p>
@@ -612,27 +759,33 @@ function App() {
                   >
                     Submit Wish
                   </button>
+
                 </div>
+
               )}
 
               {success && (
                 <p
                   className="success-message"
                   role="status"
+                  aria-live="polite"
                 >
                   Thank you! Your beautiful wish has been
-                  received.
+                  received and is awaiting approval.
                 </p>
               )}
+
             </form>
+
           </section>
+
         </main>
       )}
 
-      {/* Page Footer */}
       <footer>
         <p>VowMemories © 2026. Made with love.</p>
       </footer>
+
     </div>
   );
 }
