@@ -10,7 +10,7 @@ function loadWishes() {
     const savedWishes = localStorage.getItem(STORAGE_KEY);
     return savedWishes ? JSON.parse(savedWishes) : [];
   } catch (error) {
-    console.error("Unable to load wedding wishes:", error);
+    console.error("Unable to load saved messages:", error);
     return [];
   }
 }
@@ -24,14 +24,12 @@ function App() {
 
   
   const [guestName, setGuestName] = useState("");
-  const [recipient, setRecipient] = useState("Couple");
   const [message, setMessage] = useState("");
   const [success, setSuccess] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
 
   const [wishes, setWishes] = useState(loadWishes);
 
-  const [selectedRecipient, setSelectedRecipient] = useState("All");
   const [currentWishIndex, setCurrentWishIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(true);
   const [showControls, setShowControls] = useState(true);
@@ -45,30 +43,41 @@ function App() {
     (wish) => wish.approved !== true
   );
 
-  const filteredWishes =
-    selectedRecipient === "All"
-      ? approvedWishes
-      : approvedWishes.filter(
-          (wish) => wish.recipient === selectedRecipient
-        );
+  
+  const filteredWishes = approvedWishes;
 
   const currentWish =
     filteredWishes.length > 0
       ? filteredWishes[currentWishIndex % filteredWishes.length]
       : null;
 
+  function handlePreview() {
+    if (!guestName.trim() || !message.trim()) {
+      window.alert("Please enter your name and message.");
+      return;
+    }
+
+    setSuccess(false);
+    setShowPreview(true);
+  }
+
   function handleSubmit(event) {
     event.preventDefault();
 
-    if (!guestName.trim() || !message.trim()) {
-      window.alert("Please enter your name and wedding wish.");
+    if (!showPreview) {
+      handlePreview();
+      return;
+    }
+
+     if (!guestName.trim() || !message.trim()) {
+      window.alert("Please enter your name and message.");
+      setShowPreview(false);
       return;
     }
 
     const newWish = {
       id: Date.now(),
       guestName: guestName.trim(),
-      recipient,
       message: message.trim(),
       approved: false,
       date: new Date().toISOString(),
@@ -80,13 +89,11 @@ function App() {
     saveWishes(updatedWishes);
 
     setGuestName("");
-    setRecipient("Couple");
     setMessage("");
     setShowPreview(false);
     setSuccess(true);
   }
-
-  // Approve a guest wish
+   
   function handleApprove(wishId) {
     const updatedWishes = wishes.map((wish) =>
       wish.id === wishId
@@ -94,7 +101,7 @@ function App() {
         : wish
     );
 
-    setWishes(updatedWishes);
+       setWishes(updatedWishes);
     saveWishes(updatedWishes);
   }
 
@@ -117,7 +124,7 @@ function App() {
     );
   }
 
-  function showNextWish() {
+   function showNextWish() {
     if (filteredWishes.length === 0) return;
 
     setCurrentWishIndex(
@@ -138,12 +145,19 @@ function App() {
       );
     }, 5000);
 
-    return () => clearInterval(timer);
+      return () => clearInterval(timer);
   }, [isPaused, filteredWishes.length]);
 
   useEffect(() => {
-    setCurrentWishIndex(0);
-  }, [selectedRecipient]);
+    function syncWishes(event) {
+      if (event.key === STORAGE_KEY) {
+        setWishes(loadWishes());
+      }
+    }
+
+    window.addEventListener("storage", syncWishes);
+    return () => window.removeEventListener("storage", syncWishes);
+  }, []);
 
   return (
     <div className="app">
@@ -175,7 +189,7 @@ function App() {
                 <h1>VowMemories</h1>
               </div>
 
-              <h2>Live Wedding Wishes</h2>
+              <h2>Live Event Messages</h2>
 
               <p className="live-indicator">
                 <span className="live-dot"></span>
@@ -183,7 +197,7 @@ function App() {
               </p>
             </div>
 
-            <div className="theme-selector">
+        <div className="theme-selector">
               <label htmlFor="theme">
                 Presentation Theme:
               </label>
@@ -209,9 +223,9 @@ function App() {
 
                   <p className="wish-label">
                     A MESSAGE OF LOVE
-                  </p>
+                  </p>   
 
-                  <h3>{currentWish.guestName}</h3>
+                 <h3>{currentWish.guestName}</h3>
 
                   <span className="wish-divider"></span>
 
@@ -220,13 +234,13 @@ function App() {
                   </p>
 
                   <small>
-                    With love, for {currentWish.recipient}
+                    A message for this celebration
                   </small>
                 </>
               ) : (
                 <p>
-                  Wedding wishes will appear here once they
-                  have been approved.
+                  Approved messages will appear here once they
+                  are ready to be shared.
                 </p>
               )}
             </div>
@@ -237,9 +251,9 @@ function App() {
                 {filteredWishes.length > 0
                   ? (currentWishIndex % filteredWishes.length) + 1
                   : 0}
-              </span>
+              </span>   
 
-              <span className="counter-divider">/</span>
+               <span className="counter-divider">/</span>
 
               <span>{filteredWishes.length}</span>
             </div>
@@ -269,7 +283,7 @@ function App() {
                       <path d="m12 5-7 7 7 7" />
                     </svg>
 
-                    <span>Previous</span>
+            <span>Previous</span>
                   </button>
 
 
@@ -291,10 +305,10 @@ function App() {
                     <span>
                       {isPaused ? "Resume" : "Pause"}
                     </span>
-                  </button>
+                  </button>    
 
 
-                  <button
+                     <button
                     type="button"
                     className="slide-control"
                     onClick={showNextWish}
@@ -316,10 +330,10 @@ function App() {
                       <path d="M5 12h14" />
                       <path d="m12 5 7 7-7 7" />
                     </svg>
-                  </button>
+                  </button>   
 
 
-                  <button
+                   <button
                     type="button"
                     onClick={() => {
                       const display = document.getElementById(
@@ -337,10 +351,10 @@ function App() {
                     <span>⛶</span> Full Screen
                   </button>
                 </>
-              )}
+              )}   
 
 
-              <button
+            <button
                 type="button"
                 className="slide-control"
                 onClick={() => setShowControls(!showControls)}
@@ -351,11 +365,11 @@ function App() {
                   : "Show Controls"}
               </button>
 
-            </div>
+            </div>  
 
 
-            <div className="slideshow-footer">
-              <p>VOWMEMORIES . CELEBRATING LOVE</p>
+      <div className="slideshow-footer">
+              <p>VOWMEMORIES . CELEBRATING MOMENTS</p>
             </div>
 
           </section>
@@ -363,13 +377,13 @@ function App() {
           <section className="saved-wishes">
 
             <div className="dashboard-heading">
-              <p className="eyebrow">WEDDING MANAGEMENT</p>
+              <p className="eyebrow">EVENT MANAGEMENT</p>
 
-              <h2>Wedding Wishes Dashboard</h2>
+              <h2>Messages Dashboard</h2>
 
               <p>
-                Review guest messages and choose the wishes
-                that will appear during the celebration.
+                Review guest messages and choose which ones
+                will appear during the event.
               </p>
             </div>
 
@@ -377,17 +391,17 @@ function App() {
 
               <div className="summary-card">
                 <h3>{wishes.length}</h3>
-                <p>Total Wishes</p>
-              </div>
+                <p>Total Messages</p>
+              </div>  
 
-              <div className="summary-card">
+               <div className="summary-card">
                 <h3>{pendingWishes.length}</h3>
                 <p>Awaiting Approval</p>
               </div>
 
               <div className="summary-card">
                 <h3>{approvedWishes.length}</h3>
-                <p>Approved Wishes</p>
+                <p>Approved Messages</p>
               </div>
 
             </div>
@@ -395,11 +409,11 @@ function App() {
             <div className="pending-section">
 
               <h3>
-                Wishes Awaiting Approval ({pendingWishes.length})
+                Messages Awaiting Approval ({pendingWishes.length})
               </h3>
 
               {pendingWishes.length === 0 ? (
-                <p>No wishes are waiting for approval.</p>
+                <p>No messages are waiting for approval.</p>
               ) : (
                 pendingWishes.map((wish) => (
                   <div className="wish-card" key={wish.id}>
@@ -408,7 +422,6 @@ function App() {
 
                     <p>{wish.message}</p>
 
-                    <small>For: {wish.recipient}</small>
 
                     <div className="moderation-buttons">
 
@@ -437,53 +450,16 @@ function App() {
             <div className="approved-section">
 
               <h3>
-                Saved Wedding Wishes ({approvedWishes.length})
+                Approved Messages ({approvedWishes.length})
               </h3>
 
               <p>
-                Select a category to view approved messages
-                for the slideshow.
+                These approved messages are ready for the slideshow.
               </p>
-
-              <div className="collection-buttons">
-
-                <button
-                  type="button"
-                  onClick={() => setSelectedRecipient("All")}
-                  aria-pressed={selectedRecipient === "All"}
-                >
-                  All Wishes
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setSelectedRecipient("Bride")}
-                  aria-pressed={selectedRecipient === "Bride"}
-                >
-                  Bride
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setSelectedRecipient("Groom")}
-                  aria-pressed={selectedRecipient === "Groom"}
-                >
-                  Groom
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setSelectedRecipient("Couple")}
-                  aria-pressed={selectedRecipient === "Couple"}
-                >
-                  Couple
-                </button>
-
-              </div>
 
               {filteredWishes.length === 0 ? (
                 <p>
-                  No approved wishes in this category yet.
+                  No approved messages yet.
                 </p>
               ) : (
                 filteredWishes.map((wish) => (
@@ -493,7 +469,6 @@ function App() {
 
                     <p>{wish.message}</p>
 
-                    <small>For: {wish.recipient}</small>
 
                   </div>
                 ))
@@ -505,42 +480,37 @@ function App() {
 
         </main>
       )}
+    
 
-
-      {!isMC && (
+    {!isMC && (
         <main>
-
-          {/* Hero Section */}
 
           <section className="hero" id="home">
 
             <p className="eyebrow">
-              A DAY WORTH REMEMBERING
+              A MOMENT WORTH REMEMBERING
             </p>
 
             <h1 className="hero-title">
-              <span>Leave a message</span>
+              <span>Your words deserve</span>
 
               <span className="hero-highlight">
-                they will treasure.
+                to be remembered.
               </span>
             </h1>
 
             <p className="hero-description">
-              Wedding days fly by, and not everyone gets a
-              moment with the couple. Leave them a message
-              they can read and treasure long after the
-              celebrations.
+              Every celebration creates beautiful memories.
+              Leave a heartfelt message that can be treasured
+              long after the special day.
             </p>
 
 
             <div className="hero-buttons">
 
-              <a
-                href="#send-wish"
-                className="primary-button"
+              <a href="#send-wish" className="primary-button"
               >
-                Send your wishes
+                Leave a Message
               </a>
 
               <a
@@ -554,104 +524,72 @@ function App() {
 
             <div className="hero-note">
               <span></span>
-              A guestbook filled with love.
+              A guestbook for messages, memories, and meaningful moments.
             </div>
 
           </section>
 
-          <section
-            className="how-section"
-            id="how-it-works"
-          >
+          <section className="how-section" id="how-it-works" >
 
             <p className="eyebrow">
-              MORE THAN A GUESTBOOK
+              A MEMORY IN THREE SIMPLE STEPS
             </p>
 
-            <h2>Your message belongs in their story</h2>
+            <h2>Make your words part of the celebration</h2>
 
             <p>
-              Leave the couple a message they can look back
-              on whenever they want to remember this day.
+              Share a message, preview your words, and leave
+              something meaningful for the host to remember.
             </p>
 
 
             <div className="steps-grid">
-
               <div className="step-card">
                 <span className="step-number">01</span>
-
-                <h3>Write Your Wish</h3>
-
+                <h3>Write Your Message</h3>
                 <p>
                   Share your name and write a heartfelt
-                  message for the bride, groom or couple.
+                  message.
                 </p>
               </div>
 
 
               <div className="step-card">
-                <span className="step-number">02</span>
-
-                <h3>Preview & Submit</h3>
-
-                <p>
-                  Review your message before submitting
-                  your wedding wish.
-                </p>
+              <span className="step-number">02</span>
+              <h3>Preview & Submit</h3>
+              <p>
+                  Read through your message before submitting.</p>
               </div>
 
 
               <div className="step-card">
-                <span className="step-number">03</span>
-
-                <h3>Celebrate Their Story</h3>
-
+              <span className="step-number">03</span>
+              <h3>Make It Memorable</h3>
                 <p>
-                  Once approved, your message can become
-                  part of the couple's wedding memories.
+                 Your message can be shared during the event once approved.
                 </p>
               </div>
-
             </div>
-
           </section>
 
-          <section
-            className="wish-section"
-            id="send-wish"
-          >
+<section className="wish-section" id="send-wish">
+          <p className="eyebrow">A NOTE FROM THE HEART</p>
 
-            <p className="eyebrow">
-              LEAVE A LOVING MESSAGE
-            </p>
-
-            <h2>Send your wedding wishes</h2>
+            <h2>Leave a beautiful memory</h2>
 
             <p>
-              Share a heartfelt message with the happy couple.
+              Take a moment to share your thoughts and good wishes.
             </p>
 
-
-            {/* Guest Wish Form */}
-
-            <form
-              className="wish-form"
-              onSubmit={handleSubmit}
-            >
-
+            <form className="wish-form" onSubmit={handleSubmit}>
               {!showPreview ? (
                 <>
+            <label htmlFor="guest-display-name"> Your name</label>
 
-                  <label htmlFor="guest-display-name">
-                    Your name
-                  </label>
-
-                  <input
+<input
                     id="guest-display-name"
-                    name="guest-display-name"
                     type="text"
-                    placeholder="Enter your name"
+                    placeholder="How should we address you?"
                     autoComplete="name"
                     value={guestName}
                     onChange={(event) => {
@@ -661,34 +599,12 @@ function App() {
                     required
                   />
 
-                  <label htmlFor="recipient">
-                    Who is your message for?
-                  </label>
-
-                  <select
-                    id="recipient"
-                    name="recipient"
-                    value={recipient}
-                    onChange={(event) =>
-                      setRecipient(event.target.value)
-                    }
-                  >
-                    <option value="Bride">Bride</option>
-                    <option value="Groom">Groom</option>
-                    <option value="Couple">
-                      Both, the happy couple
-                    </option>
-                  </select>
-
-
-                  <label htmlFor="message">
-                    Your wedding wish
-                  </label>
+                  <label htmlFor="message">Your message</label>
 
                   <textarea
                     id="message"
                     name="message"
-                    placeholder="Write your beautiful message here..."
+                    placeholder="Write something meaningful..."
                     rows="5"
                     maxLength={500}
                     value={message}
@@ -696,56 +612,33 @@ function App() {
                       setMessage(event.target.value);
                       setSuccess(false);
                     }}
-                    required
+                     required
                   />
 
-                  <div
-                    className="character-counter"
-                    aria-live="polite"
-                  >
+                  <div className="character-counter" aria-live="polite">
                     {message.length} / 500 characters
                   </div>
 
                   <button
                     type="button"
                     className="submit-button"
-                    onClick={() => {
-                      if (
-                        guestName.trim() &&
-                        message.trim()
-                      ) {
-                        setShowPreview(true);
-                      } else {
-                        window.alert(
-                          "Please enter your name and wedding wish first."
-                        );
-                      }
-                    }}
+                    onClick={handlePreview}
                   >
-                    Preview Your Wish
+                    Preview Your Message
                   </button>
 
                 </>
               ) : (
 
                 <div className="wish-preview">
+                <p className="eyebrow">YOUR MESSAGE</p>
+                <h3>A little something for you</h3>
 
-                  <h3>Preview Your Wedding Wish</h3>
+               <p><strong>From:</strong> {guestName}</p>
 
-                  <p>
-                    <strong>From:</strong> {guestName}
-                  </p>
+              <p className="preview-message">{message}</p>
 
-                  <p>
-                    <strong>To:</strong> {recipient}
-                  </p>
-
-                  <p>
-                    <strong>Your message:</strong>
-                  </p>
-
-                  <p>{message}</p>
-
+             <div className="preview-actions">
                   <button
                     type="button"
                     onClick={() => setShowPreview(false)}
@@ -753,37 +646,31 @@ function App() {
                     Edit Message
                   </button>
 
-                  <button
-                    type="submit"
-                    className="submit-button"
-                  >
-                    Submit Wish
-                  </button>
+            <button type="submit" className="submit-button">
+             Submit Message
+             </button>
+            </div>
+            </div>
 
-                </div>
-
-              )}
+            )}
 
               {success && (
-                <p
-                  className="success-message"
-                  role="status"
-                  aria-live="polite"
-                >
-                  Thank you! Your beautiful wish has been
-                  received and is awaiting approval.
+                <div className="success-message" role="status">
+                  <h3>Thank you for sharing!</h3>
+                  <p>
+                    Your message has been received and is waiting
+                    for the event team to review it. Thank you for
+                    being part of this special moment.
                 </p>
+                </div>
               )}
-
             </form>
-
           </section>
-
         </main>
       )}
 
       <footer>
-        <p>VowMemories © 2026. Made with love.</p>
+        <p>VowMemories © 2026. Made for meaningful moments.</p>
       </footer>
 
     </div>
